@@ -36,7 +36,7 @@ trapinithart(void)
 void
 usertrap(void)
 {
-  int which_dev = 0;
+  int which_dev =0;
 
   if((r_sstatus() & SSTATUS_SPP) != 0)
     panic("usertrap: not from user mode");
@@ -63,7 +63,6 @@ usertrap(void)
     // an interrupt will change sepc, scause, and sstatus,
     // so enable only now that we're done with those registers.
     intr_on();
-
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
@@ -77,11 +76,20 @@ usertrap(void)
     exit(-1);
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2)
-    yield();
-
-  usertrapret();
+// give up the CPU if this is a timer interrupt.
+if(which_dev == 2&&myproc()->shutSigFlag==0) {
+  if(p->alarm_interval != 0 && ++p->ticks_count == p->alarm_interval && p->is_alarming == 0) {
+    // 保存寄存器内容
+    memmove(p->alarm_trapframe, p->trapframe, sizeof(struct trapframe));
+    // 更改陷阱帧中保留的程序计数器，注意一定要在保存寄存器内容后再设置epc
+    p->trapframe->epc = (uint64)p->alarm_handler;
+    p->ticks_count = 0;
+    p->is_alarming = 1;
+  }
+  yield();
 }
+  usertrapret();
+  }
 
 //
 // return to user space

@@ -83,7 +83,15 @@ enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
 // Per-process state
 struct proc {
+	int shutSigFlag;
   struct spinlock lock;
+  int alarm_interval;          // 报警间隔
+void (*alarm_handler)();     // 报警处理函数
+int ticks_count;             // 两次报警间的滴答计数
+int is_alarming;                    // 是否正在执行告警处理函数
+struct trapframe* alarm_trapframe;  // 告警陷阱帧
+   struct trapframe *alarmframe;// data page to restore all register when going back from alarm handler
+    int inalarm;                 // if the alarm handler is going on
 
   // p->lock must be held when using these:
   enum procstate state;        // Process state

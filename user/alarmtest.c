@@ -24,7 +24,7 @@ int
 main(int argc, char *argv[])
 {
   test0();
-  test1();
+  test1();  
   test2();
   test3();
   exit(0);
@@ -185,7 +185,7 @@ test3()
   for(int i = 0; i < 500000000; i++)
     ;
   asm volatile("mv %0, a0" : "=r" (a0) );
-
+//printf("a0=%x\n",a0);
   if(a0 != 0xac)
     printf("test3 failed: register a0 changed\n");
   else
